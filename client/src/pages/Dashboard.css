@@ -1,0 +1,77 @@
+.trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+}
+
+.trip-row-main {
+  flex: 1 1 220px;
+}
+
+.trip-status {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.trip-status-planned {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+.trip-status-completed {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--success);
+}
+
+.trip-row-main h3 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.trip-date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.trip-row-stats {
+  display: flex;
+  gap: 18px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  flex: 1 1 160px;
+}
+
+.trip-row-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .trip-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .trip-row-actions {
+    width: 100%;
+  }
+
+  .trip-row-actions .btn {
+    flex: 1;
+  }
+}

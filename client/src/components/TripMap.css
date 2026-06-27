@@ -1,0 +1,42 @@
+.trip-map-wrapper {
+  width: 100%;
+  height: 420px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+.trip-map-message {
+  width: 100%;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+}
+
+.trip-map-error {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background-color: var(--surface);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 640px) {
+  .trip-map-wrapper,
+  .trip-map-message {
+    height: 320px;
+  }
+}
