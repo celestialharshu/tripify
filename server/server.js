@@ -11,9 +11,23 @@ const app = express();
 
 // allow requests only from our client app (set CLIENT_URL in .env)
 // falls back to allowing everything if it's not set, so local dev still works
+const cors = require("cors");
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (
+        origin.endsWith(".vercel.app") ||
+        origin === "http://localhost:5173"
+      ) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
   })
 );
 
