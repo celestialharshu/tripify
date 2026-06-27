@@ -1,107 +1,116 @@
-import { useState, useCallback, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  GoogleMap,
-  useJsApiLoader,
-  DirectionsService,
-  DirectionsRenderer,
-} from "@react-google-maps/api";
-import { useTheme } from "../context/ThemeContext";
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polyline,
+  Popup,
+} from "react-leaflet";
+import L from "leaflet";
+
+import { geocode, getRoute } from "../api/openRouteApi";
 import "./TripMap.css";
 
-const mapContainerStyle = {
-  width: "100%",
-  height: "100%",
-};
+delete L.Icon.Default.prototype._getIconUrl;
 
-// default center (India) shown before a route has been calculated
-const defaultCenter = { lat: 22.9734, lng: 78.6569 };
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
-// a simple muted map style for dark mode so the map doesn't look out of place
-const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#16241f" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#9fb3ae" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#16241f" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#233331" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1716" }] },
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#1c3330" }] },
-];
+const INDIA_CENTER = [22.9734, 78.6569];
 
-// origin/destination are plain place names typed by the user (e.g. "Jammu", "Srinagar")
-// onRouteFound is called with { distanceText, durationText } once Google calculates the route
 const TripMap = ({ origin, destination, onRouteFound }) => {
-  const { theme } = useTheme();
-  const [directions, setDirections] = useState(null);
-  const [mapError, setMapError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [route, setRoute] = useState([]);
+  const [originPos, setOriginPos] = useState(null);
+  const [destinationPos, setDestinationPos] = useState(null);
+  const [error, setError] = useState("");
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-  });
-
-  // a fresh search means we need a fresh route, so clear out the old one
-  // this lets DirectionsService run again for the new origin/destination pair
   useEffect(() => {
-    setDirections(null);
-    setMapError("");
-  }, [origin, destination]);
+    if (!origin || !destination) return;
 
-  // called once by DirectionsService whenever origin/destination changes
-  const directionsCallback = useCallback(
-    (result, status) => {
-      if (status === "OK" && result) {
-        setDirections(result);
-        setMapError("");
+    const loadRoute = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-        const leg = result.routes[0].legs[0];
+        const start = await geocode(origin);
+        const end = await geocode(destination);
+
+        setOriginPos([start.lat, start.lng]);
+        setDestinationPos([end.lat, end.lng]);
+
+        const data = await getRoute(start, end);
+
+        setRoute(data.coordinates);
+
         onRouteFound({
-          distanceText: leg.distance.text,
-          durationText: leg.duration.text,
+          distanceText: `${(data.distance / 1000).toFixed(1)} km`,
+          durationText: `${Math.round(data.duration / 60)} mins`,
         });
-      } else {
-        setMapError("Couldn't find a driving route between these two places. Try checking the spelling.");
+      } catch (err) {
+        console.error(err);
+        setError("Unable to calculate route.");
+      } finally {
+        setLoading(false);
       }
-    },
-    [onRouteFound]
-  );
+    };
 
-  if (loadError) {
-    return (
-      <div className="trip-map-message">
-        Could not load Google Maps. Double check your API key in the .env file.
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return <div className="trip-map-message">Loading map…</div>;
-  }
+    loadRoute();
+  }, [origin, destination]);
 
   return (
     <div className="trip-map-wrapper">
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={defaultCenter}
+
+      {loading && (
+        <div className="trip-map-message">
+          Calculating route...
+        </div>
+      )}
+
+      {error && (
+        <div className="trip-map-error">
+          {error}
+        </div>
+      )}
+
+      <MapContainer
+        center={originPos || INDIA_CENTER}
         zoom={5}
-        options={{
-          styles: theme === "dark" ? darkMapStyle : [],
-          disableDefaultUI: false,
-          zoomControl: true,
-        }}
+        style={{ height: "420px", width: "100%" }}
       >
-        {origin && destination && !directions && (
-          <DirectionsService
-            options={{
-              origin,
-              destination,
-              travelMode: "DRIVING",
-            }}
-            callback={directionsCallback}
-          />
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {originPos && (
+          <Marker position={originPos}>
+            <Popup>Start</Popup>
+          </Marker>
         )}
 
-        {directions && <DirectionsRenderer options={{ directions }} />}
-      </GoogleMap>
+        {destinationPos && (
+          <Marker position={destinationPos}>
+            <Popup>Destination</Popup>
+          </Marker>
+        )}
 
-      {mapError && <p className="trip-map-error">{mapError}</p>}
+        {route.length > 0 && (
+          <Polyline
+            positions={route}
+            pathOptions={{
+              color: "#0d9488",
+              weight: 5,
+            }}
+          />
+        )}
+      </MapContainer>
     </div>
   );
 };

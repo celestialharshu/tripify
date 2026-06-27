@@ -132,10 +132,10 @@ const Planner = () => {
                   <span className="route-summary-value">{routeInfo.durationText}</span>
                 </div>
                 <button
-                  className="btn btn-primary"
-                  onClick={handleSaveTrip}
-                  disabled={saving}
-                >
+    className="btn btn-primary"
+    onClick={handleSaveTrip}
+    disabled={saving || !routeInfo}
+>
                   {saving ? "Saving..." : "Save this trip"}
                 </button>
               </div>
@@ -144,10 +144,12 @@ const Planner = () => {
             {saveMessage && <p className="planner-save-message">{saveMessage}</p>}
 
             <TripMap
-              origin={searchedRoute.from}
-              destination={searchedRoute.to}
-              onRouteFound={setRouteInfo}
-            />
+    origin={searchedRoute?.from}
+    destination={searchedRoute?.to}
+    onRouteFound={(data) => {
+        setRouteInfo(data);
+    }}
+/>
           </div>
         )}
       </div>
