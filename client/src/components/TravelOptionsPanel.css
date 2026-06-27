@@ -1,0 +1,77 @@
+.travel-options {
+  padding: 26px 28px;
+}
+
+.travel-options h3 {
+  font-size: 1.15rem;
+  margin-bottom: 18px;
+}
+
+.travel-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+.travel-option {
+  padding: 18px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.travel-option-icon {
+  font-size: 1.6rem;
+}
+
+.travel-option h4 {
+  font-size: 1rem;
+  margin: 8px 0 4px;
+}
+
+.travel-option p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.travel-option-time {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.travel-option-note {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.travel-option-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.travel-option-links a {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 20px;
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.travel-option-links a:hover {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.travel-options-note {
+  margin-top: 22px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

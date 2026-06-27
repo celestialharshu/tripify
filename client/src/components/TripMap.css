@@ -1,18 +1,39 @@
-.trip-map-wrapper{
-    width:100%;
-    height:420px;
-    overflow:hidden;
-    border-radius:16px;
+.trip-map-wrapper {
+  width: 100%;
+  height: 420px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
-.trip-map-message{
-    padding:15px;
-    text-align:center;
-    font-weight:600;
+.trip-map-message {
+  width: 100%;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
 }
 
-.trip-map-error{
-    color:red;
-    padding:10px;
-    text-align:center;
+.trip-map-pin {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+
+/* free OpenStreetMap tiles only come in a light style. for dark mode we invert
+   the tile colors with a CSS filter instead of paying for a dark tile provider -
+   a common trick, and it only targets the raster tile layer, not our markers/route */
+[data-theme="dark"] .trip-map-wrapper .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+
+@media (max-width: 640px) {
+  .trip-map-wrapper,
+  .trip-map-message {
+    height: 320px;
+  }
 }
