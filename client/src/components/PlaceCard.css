@@ -74,9 +74,10 @@
   color: var(--text-secondary);
   line-height: 1.55;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+-webkit-box-orient: vertical;
+-webkit-line-clamp: 3;
+line-clamp: 3;
+overflow: hidden;
 }
 
 .place-card-footer {
