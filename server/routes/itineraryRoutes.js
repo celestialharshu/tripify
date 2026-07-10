@@ -24,7 +24,6 @@ Rules:
 - Include local food to try and small travel tips
 - Make timings realistic for India (account for travel time between spots)
 - Keep each bullet concise — one line only
-- tell the weather for the date selected ${date}
 - tell travel options best option via train,bus or car also tell the minimum time with each
 - top low price hostels near bye with prices`
 ;
