@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { GoogleGenAI } from "@google/genai";
 import "./AiItinerary.css";
 
 // the API key lives in the client .env (VITE_GEMINI_API_KEY)
 // this is fine for a portfolio project — in production you'd proxy through your backend
-const ai = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY,
-});
+const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+
 const AiItinerary = ({ from, to }) => {
   const [itinerary, setItinerary] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,48 +45,51 @@ Rules:
 - Make timings realistic for India (account for travel time between spots)
 - Keep each bullet concise — one line only`;
 
-try {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      temperature: 0.7,
-      maxOutputTokens: 1200,
-    },
-  });
+    try {
+      const res = await fetch(`${GEMINI_URL}?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1200,
+          },
+        }),
+      });
 
-  const rawText = response.text;
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error?.message || "Gemini API request failed");
+      }
 
-  if (!rawText) {
-    throw new Error("Gemini returned an empty response");
-  }
+      const data = await res.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-  const cleaned = rawText
-    .replace(/\*\*/g, "")
-    .replace(/\*/g, "")
-    .replace(/^#{1,6}\s/gm, "")
-    .trim();
+      if (!rawText) throw new Error("Gemini returned an empty response");
 
-  const dayBlocks = cleaned
-    .split(/\n(?=Day \d)/i)
-    .map((block) => {
-      const lines = block
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean);
+      // strip any leftover markdown formatting just in case
+      const cleaned = rawText
+        .replace(/\*\*/g, "")
+        .replace(/\*/g, "")
+        .replace(/^#{1,6}\s/gm, "")
+        .trim();
 
-      return {
-        title: lines[0],
-        items: lines.slice(1),
-      };
-    });
+      // split the response into day blocks
+      const dayBlocks = cleaned
+        .split(/\n(?=Day \d)/i)
+        .map((block) => {
+          const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+          const title = lines[0];
+          const items = lines.slice(1).filter((l) => l.startsWith("•") || l.startsWith("-"));
+          return { title, items };
+        })
+        .filter((d) => d.items.length > 0);
 
-  setItinerary(dayBlocks);
-} catch (err) {
-  console.error(err);
-  setError(err.message);
-}
-     finally {
+      setItinerary(dayBlocks);
+    } catch (err) {
+      setError(err.message || "Something went wrong. Check your Gemini API key in .env");
+    } finally {
       setLoading(false);
     }
   };
