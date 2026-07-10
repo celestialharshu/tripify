@@ -1,51 +1,56 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createTrip } from "../api/tripApi";
 import { geocodePlace, getRoute } from "../api/orsApi";
 import { formatRoute } from "../utils/distance";
 import TripMap from "../components/TripMap";
-import TravelOptionsPanel from "../components/TravelOptionsPanel";
+import AiItinerary from "../components/AiItinerary";
 import "./Planner.css";
 
 const Planner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({ from: "", to: "", date: "" });
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
 
-  // the resolved coordinates and routes for the last search
-  // these get shared by both the map and the travel options panel below
   const [originCoord, setOriginCoord] = useState(null);
   const [destinationCoord, setDestinationCoord] = useState(null);
   const [drivingRoute, setDrivingRoute] = useState(null);
-  const [walkingRoute, setWalkingRoute] = useState(null);
 
   const [saveMessage, setSaveMessage] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // if the user arrived here via a "Book Now" click on a place card,
+  // the destination is already in the URL as ?to=PlaceName — pre-fill it
+  useEffect(() => {
+    const destinationFromUrl = searchParams.get("to");
+    if (destinationFromUrl) {
+      setFormData((prev) => ({ ...prev, to: destinationFromUrl }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // fires when the form is submitted (covers both the Enter key and clicking the button)
   const handleSearch = async (e) => {
     e.preventDefault();
 
-    if (!formData.from.trim() || !formData.to.trim() || !formData.date) {
-      return;
-    }
+    if (!formData.from.trim() || !formData.to.trim() || !formData.date) return;
 
     setSearching(true);
     setSearchError("");
     setSaveMessage("");
     setDrivingRoute(null);
-    setWalkingRoute(null);
+    setOriginCoord(null);
+    setDestinationCoord(null);
 
     try {
-      // step 1: turn the two place names into real coordinates
+      // step 1: turn city names into coordinates
       const [origin, destination] = await Promise.all([
         geocodePlace(formData.from),
         geocodePlace(formData.to),
@@ -54,22 +59,12 @@ const Planner = () => {
       setOriginCoord(origin);
       setDestinationCoord(destination);
 
-      // step 2: the actual driving route - this is what gets shown on the map
-      // and saved if the user keeps this trip
+      // step 2: get the actual road route for the map
       const driving = await getRoute(origin, destination, "driving-car");
       setDrivingRoute(formatRoute(driving));
-
-      // step 3: a walking route too, just for the comparison panel
-      // wrapped in its own try/catch so a slow/odd walking route never blocks the page
-      try {
-        const walking = await getRoute(origin, destination, "foot-walking");
-        setWalkingRoute(formatRoute(walking));
-      } catch {
-        setWalkingRoute(null);
-      }
     } catch (err) {
       setSearchError(
-        err.message || "Couldn't find a route between these places. Try checking the spelling."
+        err.message || "Couldn't find a route. Check the place names and try again."
       );
     } finally {
       setSearching(false);
@@ -93,9 +88,9 @@ const Planner = () => {
         distanceText: drivingRoute.distanceText,
         durationText: drivingRoute.durationText,
       });
-      setSaveMessage("Trip saved! You can see it on your dashboard.");
+      setSaveMessage("Trip saved! Head to your dashboard to track it.");
     } catch (err) {
-      setSaveMessage(err.response?.data?.message || "Could not save the trip, please try again.");
+      setSaveMessage(err.response?.data?.message || "Couldn't save the trip. Try again.");
     } finally {
       setSaving(false);
     }
@@ -107,10 +102,11 @@ const Planner = () => {
         <span className="eyebrow">Trip planner</span>
         <h2 className="section-heading">Where are you headed?</h2>
         <p className="section-subtext">
-          Type a starting point, a destination and a date, then hit enter to see the route on
-          the map plus how it compares across walking, cab, train and flight.
+          Enter a starting point, destination and date — get the route on the map, then let AI
+          plan the whole trip for you day by day.
         </p>
 
+        {/* ---- search form ---- */}
         <form className="planner-form card-surface" onSubmit={handleSearch}>
           <div className="form-group">
             <label htmlFor="from">From</label>
@@ -150,13 +146,18 @@ const Planner = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary planner-search-btn" disabled={searching}>
+          <button
+            type="submit"
+            className="btn btn-primary planner-search-btn"
+            disabled={searching}
+          >
             {searching ? "Searching..." : "Find route"}
           </button>
         </form>
 
         {searchError && <p className="error-text">{searchError}</p>}
 
+        {/* ---- results: summary strip + map ---- */}
         {drivingRoute && (
           <div className="planner-results">
             <div className="route-summary card-surface">
@@ -171,24 +172,25 @@ const Planner = () => {
                 <span className="route-summary-value">{drivingRoute.distanceText}</span>
               </div>
               <div className="route-summary-item">
-                <span className="route-summary-label">Driving time</span>
+                <span className="route-summary-label">Drive time</span>
                 <span className="route-summary-value">{drivingRoute.durationText}</span>
               </div>
               <button className="btn btn-primary" onClick={handleSaveTrip} disabled={saving}>
-                {saving ? "Saving..." : "Save this trip"}
+                {saving ? "Saving..." : "Save trip"}
               </button>
             </div>
 
             {saveMessage && <p className="planner-save-message">{saveMessage}</p>}
 
-            <TripMap originCoord={originCoord} destinationCoord={destinationCoord} route={drivingRoute} />
-
-            <TravelOptionsPanel
+            {/* the live map with the plotted driving route */}
+            <TripMap
               originCoord={originCoord}
               destinationCoord={destinationCoord}
-              drivingRoute={drivingRoute}
-              walkingRoute={walkingRoute}
+              route={drivingRoute}
             />
+
+            {/* AI day-by-day itinerary — shown below the map once a route is found */}
+            <AiItinerary from={formData.from} to={formData.to} />
           </div>
         )}
       </div>

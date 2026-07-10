@@ -1,0 +1,103 @@
+.ai-itinerary {
+  padding: 28px 30px;
+}
+
+.ai-itinerary-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ai-itinerary-header h3 {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.ai-itinerary-sub {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.ai-itinerary-error {
+  margin-bottom: 10px;
+}
+
+.ai-itinerary-loading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 0 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* the day-by-day itinerary cards */
+.ai-days {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.ai-day {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 18px 20px;
+}
+
+.ai-day h4 {
+  font-size: 1rem;
+  color: var(--primary);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ai-day ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 0;
+}
+
+.ai-day li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.87rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  list-style: none;
+}
+
+/* bullet dot */
+.ai-day li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* time portion (before the dash) gets stronger contrast */
+.ai-day li::first-line {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+  .ai-itinerary {
+    padding: 22px 18px;
+  }
+
+  .ai-itinerary-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ai-itinerary-header .btn {
+    width: 100%;
+  }
+}
