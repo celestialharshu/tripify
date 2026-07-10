@@ -59,9 +59,12 @@ Rules:
       });
 
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error?.message || "Gemini API request failed");
-      }
+  const errData = await res.json();
+
+  console.log("Gemini Error:", errData);
+
+  throw new Error(JSON.stringify(errData, null, 2));
+}
 
       const data = await res.json();
       const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
