@@ -1,5 +1,4 @@
-import express from "express";
-
+const express = require("express");
 const router = express.Router();
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -77,8 +76,7 @@ Rules:
       .replace(/^#{1,6}\s/gm, "")
       .trim();
 
-    // split the response into day blocks — same parsing logic as before,
-    // now done server-side so the client just receives clean structured data
+    // split the response into day blocks
     const dayBlocks = cleaned
       .split(/\n(?=Day \d)/i)
       .map((block) => {
@@ -96,4 +94,4 @@ Rules:
   }
 });
 
-export default router;
+module.exports = router;

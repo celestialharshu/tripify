@@ -11,8 +11,6 @@ const app = express();
 
 // allow requests only from our client app (set CLIENT_URL in .env)
 // falls back to allowing everything if it's not set, so local dev still works
-const cors = require("cors");
-
 app.use(
   cors({
     origin(origin, callback) {
@@ -42,6 +40,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/trips", require("./routes/tripRoutes"));
 app.use("/api/places", require("./routes/placeRoutes"));
+app.use("/api/itinerary", require("./routes/itineraryRoutes"));
 
 app.use(notFound);
 app.use(errorHandler);
