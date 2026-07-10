@@ -4,7 +4,7 @@ import "./AiItinerary.css";
 // the API key lives in the client .env (VITE_GEMINI_API_KEY)
 // this is fine for a portfolio project — in production you'd proxy through your backend
 const GEMINI_URL =
-"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent";
+  "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
 
 const AiItinerary = ({ from, to }) => {
   const [itinerary, setItinerary] = useState(null);
