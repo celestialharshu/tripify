@@ -8,6 +8,7 @@ const GROQ_MODEL = "llama-3.3-70b-versatile";
 // body: { from: string, to: string }
 router.post("/", async (req, res) => {
   const { from, to } = req.body;
+  const {date} = req.body;
 
   if (!from || !to) {
     return res.status(400).json({ error: "Both 'from' and 'to' are required" });
@@ -17,28 +18,17 @@ router.post("/", async (req, res) => {
 
 Return ONLY a plain text response formatted exactly like this — no markdown, no asterisks, no hashtags:
 
-Day 1
-• 7:00 AM - Description of activity
-• 9:00 AM - Breakfast at [specific local restaurant name]
-• 11:00 AM - Visit [specific attraction]
-• 1:00 PM - Lunch at [local restaurant]
-• 3:00 PM - Activity
-• 6:00 PM - Evening activity
-• 8:00 PM - Dinner at [restaurant]
-• Hotel Check-in
-
-Day 2
-(follow same format)
-
-Day 3
-(follow same format, end with departure)
-
 Rules:
 - Name specific local restaurants, dhabas or cafes (not generic ones)
 - Name specific tourist spots, viewpoints, markets, temples
 - Include local food to try and small travel tips
 - Make timings realistic for India (account for travel time between spots)
-- Keep each bullet concise — one line only`;
+- Keep each bullet concise — one line only
+- tell the weather for the date selected ${date}
+- tell travel options best option via train,bus or car also tell the minimum time with each
+- top low price hostels near bye with prices`
+;
+
 
   try {
     const groqRes = await fetch(GROQ_URL, {
