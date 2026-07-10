@@ -34,6 +34,105 @@
   font-size: 0.9rem;
 }
 
+/* weather / travel / hostel info cards — sit above the day-by-day plan */
+.ai-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.ai-info-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+}
+
+.ai-info-card h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: var(--primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ai-info-card p,
+.ai-info-card li {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* weather card */
+.ai-weather-temp {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* travel options list — train/bus/car with min time */
+.ai-travel-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding-left: 0;
+}
+
+.ai-travel-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.ai-travel-option-mode {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.ai-travel-option-time {
+  font-size: 0.78rem;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* budget hostels list */
+.ai-hostels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding-left: 0;
+}
+
+.ai-hostel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ai-hostel-name {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.ai-hostel-price {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
 /* the day-by-day itinerary cards */
 .ai-days {
   display: grid;
@@ -99,5 +198,9 @@
 
   .ai-itinerary-header .btn {
     width: 100%;
+  }
+
+  .ai-info-grid {
+    grid-template-columns: 1fr;
   }
 }
