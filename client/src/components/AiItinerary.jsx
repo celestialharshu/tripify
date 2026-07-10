@@ -1,10 +1,14 @@
 import { useState } from "react";
 import "./AiItinerary.css";
 
-// the API key lives in the client .env (VITE_GEMINI_API_KEY)
+// the API key lives in the client .env (VITE_GROQ_API_KEY)
 // this is fine for a portfolio project — in production you'd proxy through your backend
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+// Groq's currently supported free/fast model for this kind of text generation.
+// If this model gets deprecated, swap it for whatever Groq lists as current
+// at https://console.groq.com/docs/models
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 const AiItinerary = ({ from, to }) => {
   const [itinerary, setItinerary] = useState(null);
@@ -46,27 +50,29 @@ Rules:
 - Keep each bullet concise — one line only`;
 
     try {
-      const res = await fetch(`${GEMINI_URL}?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+      const res = await fetch(GROQ_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1200,
-          },
+          model: GROQ_MODEL,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 1200,
         }),
       });
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.error?.message || "Gemini API request failed");
+        throw new Error(errData.error?.message || "Groq API request failed");
       }
 
       const data = await res.json();
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const rawText = data.choices?.[0]?.message?.content;
 
-      if (!rawText) throw new Error("Gemini returned an empty response");
+      if (!rawText) throw new Error("Groq returned an empty response");
 
       // strip any leftover markdown formatting just in case
       const cleaned = rawText
@@ -88,7 +94,7 @@ Rules:
 
       setItinerary(dayBlocks);
     } catch (err) {
-      setError(err.message || "Something went wrong. Check your Gemini API key in .env");
+      setError(err.message || "Something went wrong. Check your Groq API key in .env");
     } finally {
       setLoading(false);
     }
@@ -100,7 +106,7 @@ Rules:
         <div>
           <h3>AI Trip Itinerary</h3>
           <p className="ai-itinerary-sub">
-            Powered by Gemini — a personalised day-by-day plan for {from} → {to}
+            Powered by Groq — a personalised day-by-day plan for {from} → {to}
           </p>
         </div>
 
@@ -122,7 +128,7 @@ Rules:
       {loading && (
         <div className="ai-itinerary-loading">
           <div className="spinner"></div>
-          <p>Gemini is planning your perfect trip…</p>
+          <p>Groq is planning your perfect trip…</p>
         </div>
       )}
 
